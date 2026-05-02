@@ -1,105 +1,57 @@
-name: pytest CI 
+name: Python CI with Pytest
 
- 
+# Trigger workflow on push & pull request
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-# Trigger: run on push or pull request to main branch 
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-on: 
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
 
-  push: 
+    steps:
+      # 1. Checkout your code from GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    branches: [ main ] 
+      # 2. Set up Python (based on matrix)
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-  pull_request: 
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    branches: [ main ] 
+      # 4. Debug (optional but VERY useful)
+      - name: Show project structure
+        run: ls -R
 
- 
+      # 5. Run pytest with coverage
+      - name: Run tests with pytest
+        run: |
+          mkdir -p reports
+          pytest -v tests \
+            --cov=calculator \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-fail-under=80 \
+            --html=reports/report.html \
+            --self-contained-html
 
-jobs: 
-
-  test: 
-
-    # Use the latest Ubuntu runner 
-
-    runs-on: ubuntu-latest 
-
- 
-
-    # Test against multiple Python versions 
-
-    strategy: 
-
-      matrix: 
-
-        python-version: ['3.10', '3.11', '3.12'] 
-
- 
-
-    steps: 
-
-      # 1. Check out the repository code 
-
-      - name: Checkout code 
-
-        uses: actions/checkout@v4 
-
- 
-
-      # 2. Set up the Python version from the matrix 
-
-      - name: Set up Python ${{ matrix.python-version }} 
-
-        uses: actions/setup-python@v5 
-
-        with: 
-
-          python-version: ${{ matrix.python-version }} 
-
- 
-
-      # 3. Install all dependencies from requirements.txt 
-
-      - name: Install dependencies 
-
-        run: | 
-
-          python -m pip install --upgrade pip 
-
-          pip install -r requirements.txt 
-
- 
-
-      # 4. Run all tests (unit + BDD) with coverage 
-
-      - name: Run pytest with coverage 
-
-        run: | 
-
-          pytest -v \ 
-
-            --cov=calculator \ 
-
-            --cov-report=xml \ 
-
-            --cov-fail-under=80 \ 
-
-            --html=reports/report.html \ 
-
-            --self-contained-html 
-
- 
-
-      # 5. Upload the HTML report as a downloadable artifact 
-
-      - name: Upload test report 
-
-        if: always()   # upload even if tests fail 
-
-        uses: actions/upload-artifact@v4 
-
-        with: 
-
-          name: test-report-py${{ matrix.python-version }} 
-
-          path: reports/ 
+      # 6. Upload test report (even if tests fail)
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-py${{ matrix.python-version }}
+          path: reports/
