@@ -1,0 +1,275 @@
+📄 YOUR FILE (MENTALLY)
+This file lives at:
+.github/workflows/ci.yml
+👉 This tells GitHub:
+
+“Whenever something happens, run these automated steps”
+
+
+🔹 1. Workflow Name
+name: Python CI with Pytest
+👉 Just a label
+👉 This is what you see in the GitHub Actions UI
+
+🔹 2. When does it run? (Triggers)
+on:  push:    branches: [ main ]  pull_request:    branches: [ main ]
+👉 Meaning:
+
+
+Run pipeline when:
+
+
+Code is pushed to main
+
+
+A pull request is created/updated
+
+
+
+
+🧠 Real-world meaning:
+
+“Every time code changes → automatically test it”
+
+
+🔹 3. Jobs Section
+jobs:  test:
+👉 A job = one full pipeline execution
+You named it test
+
+🔹 4. Runner (Where it runs)
+runs-on: ubuntu-latest
+👉 GitHub gives you a temporary Linux machine
+Think:
+
+“A fresh cloud computer is created just for your code”
+
+
+🔹 5. Matrix Strategy (Very Important)
+strategy:  matrix:    python-version: ['3.10', '3.11', '3.12']
+👉 This creates multiple parallel jobs
+🧠 Behind the scenes:
+Your pipeline runs 3 times:
+JobPython Version13.1023.1133.12
+👉 Ensures your code works everywhere
+
+🔹 6. Steps (Actual Work Happens Here)
+steps:
+👉 These are executed one by one
+
+🔸 Step 1: Checkout Code
+- name: Checkout repository  uses: actions/checkout@v4
+👉 What happens:
+
+
+Downloads your GitHub repo into the runner
+
+
+🧠 Without this:
+❌ Runner has no code → nothing works
+
+🔸 Step 2: Setup Python
+- name: Set up Python ${{ matrix.python-version }}uses: actions/setup-python@v5with:  python-version: ${{ matrix.python-version }}
+👉 What happens:
+
+
+Installs Python (3.10 / 3.11 / 3.12)
+
+
+🧠 ${{ matrix.python-version }}
+Means:
+
+“Use one version from the matrix”
+
+
+🔸 Step 3: Install Dependencies
+- name: Install dependenciesrun: |  python -m pip install --upgrade pip  pip install -r requirements.txt
+👉 What happens:
+
+
+Upgrades pip
+
+
+Installs all required libraries
+
+
+🧠 Why needed:
+Your app depends on external packages
+
+🔸 Step 4: Debug Step
+- name: Show project structurerun: ls -R
+👉 What happens:
+
+
+Prints all files and folders
+
+
+🧠 Why useful:
+
+
+Debug issues like:
+
+
+Missing tests/
+
+
+Wrong paths
+
+
+
+
+
+🔸 Step 5: Run Tests
+- name: Run tests with pytestrun: |  mkdir -p reports  pytest -v . --cov=calculator --cov-report=xml --cov-report=term --cov-fail-under=80 --html=reports/report.html --self-contained-html
+
+🔹 Line-by-line breakdown:
+✅ mkdir -p reports
+
+
+Creates folder for reports
+
+
+
+✅ pytest -v .
+
+
+Runs all tests in project
+
+
+-v = verbose (detailed output)
+
+
+
+✅ --cov=calculator
+
+
+Measures code coverage
+
+
+Tracks how much of your code is tested
+
+
+
+✅ --cov-report=xml
+
+
+Generates XML report (used by tools like SonarQube)
+
+
+
+✅ --cov-report=term
+
+
+Shows coverage in terminal
+
+
+
+✅ --cov-fail-under=80
+
+
+Fails pipeline if coverage < 80%
+
+
+👉 This enforces quality 🚀
+
+✅ --html=reports/report.html
+
+
+Creates HTML test report
+
+
+
+✅ --self-contained-html
+
+
+Makes report portable (no external files)
+
+
+
+🔸 Step 6: Upload Report
+- name: Upload test reportif: always()uses: actions/upload-artifact@v4with:  name: test-report-py${{ matrix.python-version }}  path: reports/
+
+👉 What happens:
+
+
+Uploads reports/ folder to GitHub
+
+
+🧠 if: always()
+Even if tests fail → still upload report
+
+🧠 Artifact naming:
+test-report-py3.10test-report-py3.11test-report-py3.12
+👉 Separate report per Python version
+
+🔁 FULL FLOW (SUPER SIMPLE)
+
+
+Code pushed
+
+
+GitHub creates Linux machine
+
+
+Downloads your code
+
+
+Installs Python
+
+
+Installs dependencies
+
+
+Runs tests
+
+
+Checks coverage
+
+
+Generates report
+
+
+Uploads report
+
+
+
+🧠 REAL-WORLD ANALOGY
+Think of this like:
+
+“Every time a developer submits code, a robot automatically:
+
+
+
+builds the environment
+
+
+runs tests
+
+
+checks quality
+
+
+gives report”
+
+
+
+🚀 FINAL UNDERSTANDING
+Your pipeline ensures:
+✅ Code works on multiple Python versions
+✅ Tests always run automatically
+✅ Code quality is enforced
+✅ Reports are generated & saved
+
+🔥 INTERVIEW ONE-LINER
+
+“This GitHub Actions workflow implements a CI pipeline that runs pytest with coverage across multiple Python versions using a matrix strategy, generates reports, and uploads them as artifacts.”
+
+
+If you want next:
+
+
+I can convert this exact pipeline into a Jenkinsfile (real industry use)
+
+
+Or help you draw architecture diagram for interview 🎯
+
