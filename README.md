@@ -1,0 +1,128 @@
+<H2>OLD CODE</H2>
+name: pytest CI 
+
+ 
+
+# Trigger: run on push or pull request to main branch 
+
+on: 
+
+  push: 
+
+    branches: [ main ] 
+
+  pull_request: 
+
+    branches: [ main ] 
+
+ 
+
+jobs: 
+
+  test: 
+
+    # Use the latest Ubuntu runner 
+
+    runs-on: ubuntu-latest 
+
+ 
+
+    # Test against multiple Python versions 
+
+    strategy: 
+
+      matrix: 
+
+        python-version: ['3.10', '3.11', '3.12'] 
+
+ 
+
+    steps: 
+
+      # 1. Check out the repository code 
+
+      - name: Checkout code 
+
+        uses: actions/checkout@v4 
+
+ 
+
+      # 2. Set up the Python version from the matrix 
+
+      - name: Set up Python ${{ matrix.python-version }} 
+
+        uses: actions/setup-python@v5 
+
+        with: 
+
+          python-version: ${{ matrix.python-version }} 
+
+ 
+
+      # 3. Install all dependencies from requirements.txt 
+
+      - name: Install dependencies 
+
+        run: | 
+
+          python -m pip install --upgrade pip 
+
+          pip install -r requirements.txt 
+
+ 
+
+      # 4. Run all tests (unit + BDD) with coverage 
+
+      - name: Run pytest with coverage 
+
+        run: | 
+
+          pytest -v \ 
+
+            --cov=calculator \ 
+
+            --cov-report=xml \ 
+
+            --cov-fail-under=80 \ 
+
+            --html=reports/report.html \ 
+
+            --self-contained-html 
+
+ 
+
+      # 5. Upload the HTML report as a downloadable artifact 
+
+      - name: Upload test report 
+
+        if: always()   # upload even if tests fail 
+
+        uses: actions/upload-artifact@v4 
+
+        with: 
+
+          name: test-report-py${{ matrix.python-version }} 
+
+          path: reports/ 
+
+
+
+
+
+
+🔧 WHAT I FIXED (IMPORTANT)
+🔴 1. Your backslash (\) formatting was broken
+❌ Your version:
+pytest -v \ 
+
+👉 There is a space after \
+👉 In Linux, this breaks line continuation
+
+Result:
+
+Command becomes invalid
+Pytest may interpret wrong input → “file not found”
+✅ Fixed:
+pytest -v \
+
+👉 No space after \ → correct multiline command
