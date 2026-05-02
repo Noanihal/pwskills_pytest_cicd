@@ -40,7 +40,7 @@ jobs:
       - name: Run tests with pytest
         run: |
           mkdir -p reports
-          pytest -v tests \
+          pytest -v .
             --cov=calculator \
             --cov-report=xml \
             --cov-report=term \
