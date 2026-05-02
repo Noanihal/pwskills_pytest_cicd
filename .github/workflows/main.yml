@@ -41,11 +41,11 @@ jobs:
         run: |
           mkdir -p reports
           pytest -v .
-            --cov=calculator \
-            --cov-report=xml \
-            --cov-report=term \
-            --cov-fail-under=80 \
-            --html=reports/report.html \
+            --cov=calculator\
+            --cov-report=xml\
+            --cov-report=term\
+            --cov-fail-under=80\
+            --html=reports/report.html\
             --self-contained-html
 
       # 6. Upload test report (even if tests fail)
